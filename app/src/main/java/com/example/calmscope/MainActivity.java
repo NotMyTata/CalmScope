@@ -2,44 +2,60 @@ package com.example.calmscope;
 
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.viewpager.widget.ViewPager;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
+    ViewPager viewPager;
+    NavAccessorAdapter navAccessorAdapter;
+    TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        viewPager = findViewById(R.id.viewpager);
+        tabLayout = findViewById(R.id.tabs);
 
-        String apiKey = "xtNjvb73MHyrib6LVzz5";
-        String imageUri = "https://source.roboflow.com/5aQUIxk7OeaQuF5bOXf2AKjtuSr2/FKsD4p2WTT643JHbtUOj/original.jpg";
+        setViewPager();
+        setTabLayout();
+    }
 
-        Call<InferenceResponse> call = apiService.detectEmotions(apiKey, imageUri);
+    private void setViewPager(){
+        navAccessorAdapter = new NavAccessorAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(navAccessorAdapter);
+    }
 
-        call.enqueue(new Callback<InferenceResponse>() {
+    private void setTabLayout(){
+        tabLayout.setupWithViewPager(viewPager);
+        setTabIcons();
+        setTabListener();
+    }
+
+    private void setTabIcons(){
+        tabLayout.getTabAt(0).setIcon(R.drawable.ic_tab_home);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_tab_photo);
+        tabLayout.getTabAt(2).setIcon(R.drawable.ic_tab_log);
+    }
+
+    private void setTabListener(){
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onResponse(Call<InferenceResponse> call, Response<InferenceResponse> response) {
-                if(response.isSuccessful()){
-                    InferenceResponse inferenceResponse = response.body();
-                    System.out.println("Inference ID: " + inferenceResponse.getInferenceId());
-                } else {
-                    System.out.println("Request failed: " + response.message());
-                }
+            public void onTabSelected(TabLayout.Tab tab) {
+
             }
 
             @Override
-            public void onFailure(Call<InferenceResponse> call, Throwable t) {
-                System.out.println("Network failure: " + t.getMessage());
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
             }
         });
     }
