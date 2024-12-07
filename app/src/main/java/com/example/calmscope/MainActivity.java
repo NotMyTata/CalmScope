@@ -1,63 +1,72 @@
 package com.example.calmscope;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.support.common.FileUtil;
+import org.tensorflow.lite.support.common.ops.CastOp;
+import org.tensorflow.lite.support.common.ops.NormalizeOp;
+import org.tensorflow.lite.support.image.ImageProcessor;
+import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
-    private Interpreter tflite;
-    private String modelPath = "best_float32.tflite";
-    Button takePictureBtn;
-    ImageView fotoView;
-    private final Integer kode_kamera = 222;
-    private final Integer image_size = 640;
+
+    private static final String MODEL_PATH = "best_float32.tflite";
+    private static final String LABEL_PATH = "labelmap.txt";
+    private Interpreter interpreter;
+    private int tensorWidth, tensorHeight, numChannel, numElements;
+    private List<String> labels = new ArrayList<>();
+    private ImageView imageView;
+    private Button takePictureBtn;
+    private static final float CONFIDENCE_THRESHOLD = 0.3f;
+    private static final float IOU_THRESHOLD = 0.5f;
 
     String namaFile;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        try {
-            tflite = new Interpreter(FileUtil.loadMappedFile(this,modelPath));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        int[] inputShape = tflite.getInputTensor(0).shape();
-        Log.d("TensorFlow", "Model input shape: " + Arrays.toString(inputShape));
-
+        imageView = findViewById(R.id.previewView);
+        takePictureBtn = findViewById(R.id.captureBtn);
+        initializeModel();
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -65,24 +74,13 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA}, 1);
         }
 
-        takePictureBtn = findViewById(R.id.captureBtn);
-        fotoView = findViewById(R.id.previewView);
-
         ActivityResultLauncher<Intent> takePictureLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
-                // Process the image from the result
                 Bitmap bm = BitmapFactory.decodeFile(namaFile, new BitmapFactory.Options());
-                fotoView.setImageBitmap(bm);
-                Toast.makeText(this, "Image captured successfully!", Toast.LENGTH_LONG).show();
+                imageView.setImageBitmap(bm);
 
-                if (tflite != null) {
-                    // Preprocess and classify the image
-                    float[][][] output = classifyImage(bm);
-                    displayPrediction(output);
-                } else {
-                    // Log an error or handle the null tflite object here
-                    Toast.makeText(this, "Interpreter is not initialized", Toast.LENGTH_SHORT).show();
-                }
+                detectObjects(bm);
+                Toast.makeText(this, "Image captured successfully!", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -99,98 +97,154 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedImage);
             takePictureLauncher.launch(intent);
         });
-
     }
 
-    // Function to find the index of the maximum value
-    // Function to find the predicted emotion class (highest confidence score)
-    private int argmax(float[][][] output) {
-        int predictedClassIndex = -1;
-        float maxConfidence = Float.MIN_VALUE;
+    private void initializeModel() {
+        try {
+            // Load the model using TensorFlow Lite Interpreter
+            Interpreter.Options options = new Interpreter.Options();
+            options.setNumThreads(4);  // You can adjust the number of threads
+            interpreter = new Interpreter(FileUtil.loadMappedFile(this, MODEL_PATH), options);
 
-        // Iterate over each emotion class (8 emotions)
-        for (int emotionIndex = 0; emotionIndex < output[0].length; emotionIndex++) {
-            // Calculate the maximum confidence for this emotion class across all 8400 values
-            float maxEmotionConfidence = Float.MIN_VALUE;
-            for (int i = 0; i < output[0][emotionIndex].length; i++) {
-                if (output[0][emotionIndex][i] > maxEmotionConfidence) {
-                    maxEmotionConfidence = output[0][emotionIndex][i];
+            // Get input and output shapes
+            int[] inputShape = interpreter.getInputTensor(0).shape();
+            int[] outputShape = interpreter.getOutputTensor(0).shape();
+
+            tensorWidth = inputShape[1];
+            tensorHeight = inputShape[2];
+            numChannel = outputShape[1];
+            numElements = outputShape[2];
+
+            // Load labels
+            loadLabels();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error loading model", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadLabels() {
+        try {
+            InputStream inputStream = getAssets().open(LABEL_PATH);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                labels.add(line);
+            }
+            reader.close();
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private TensorImage preprocessImage(Bitmap bitmap) {
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, tensorWidth, tensorHeight, false);
+        TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
+        tensorImage.load(resizedBitmap);
+        ImageProcessor imageProcessor = new ImageProcessor.Builder()
+                .add(new NormalizeOp(0f, 255f))  // Normalize pixel values to [0, 1]
+                .add(new CastOp(DataType.FLOAT32))
+                .build();
+
+        return imageProcessor.process(tensorImage);
+    }
+
+    private void detectObjects(Bitmap bitmap) {
+        TensorImage tensorImage = preprocessImage(bitmap);
+        TensorBuffer outputBuffer = TensorBuffer.createFixedSize(new int[]{1, numChannel, numElements}, DataType.FLOAT32);
+
+        interpreter.run(tensorImage.getBuffer(), outputBuffer.getBuffer());
+        List<BoundingBox> boundingBoxes = processOutput(outputBuffer.getFloatArray());
+
+        // Draw the bounding boxes on the image
+        Bitmap resultBitmap = drawBoundingBoxes(bitmap, boundingBoxes);
+
+        // Set the processed image with bounding boxes to the ImageView
+        imageView.setImageBitmap(resultBitmap);
+
+        // Display a success toast
+        Toast.makeText(this, "Object detection completed!", Toast.LENGTH_LONG).show();
+    }
+
+    private List<BoundingBox> processOutput(float[] outputArray) {
+        List<BoundingBox> boundingBoxes = new ArrayList<>();
+        for (int c = 0; c < numElements; c++) {
+            float maxConf = -1.0f;
+            int maxIdx = -1;
+            for (int j = 4; j < numChannel; j++) {
+                int arrayIdx = c + numElements * j;
+                if (outputArray[arrayIdx] > maxConf) {
+                    maxConf = outputArray[arrayIdx];
+                    maxIdx = j - 4;
                 }
             }
 
-            // Update the predicted class if the current emotion's confidence is higher than the previous max
-            if (maxEmotionConfidence > maxConfidence) {
-                maxConfidence = maxEmotionConfidence;
-                predictedClassIndex = emotionIndex;
+            if (maxConf > CONFIDENCE_THRESHOLD) {
+                float cx = outputArray[c];
+                float cy = outputArray[c + numElements];
+                float w = outputArray[c + numElements * 2];
+                float h = outputArray[c + numElements * 3];
+                float x1 = cx - (w / 2f);
+                float y1 = cy - (h / 2f);
+                float x2 = cx + (w / 2f);
+                float y2 = cy + (h / 2f);
+
+                if (x1 >= 0f && x1 <= 1f && y1 >= 0f && y1 <= 1f && x2 >= 0f && x2 <= 1f && y2 >= 0f && y2 <= 1f) {
+                    boundingBoxes.add(new BoundingBox(x1, y1, x2, y2, cx, cy, w, h, maxConf, maxIdx, labels.get(maxIdx)));
+                }
             }
         }
 
-        return predictedClassIndex;
+        return applyNMS(boundingBoxes);
     }
 
+    private List<BoundingBox> applyNMS(List<BoundingBox> boxes) {
+        List<BoundingBox> sortedBoxes = new ArrayList<>(boxes);
+        sortedBoxes.sort((a, b) -> Float.compare(b.cnf, a.cnf)); // Sort by confidence
+        List<BoundingBox> selectedBoxes = new ArrayList<>();
 
+        while (!sortedBoxes.isEmpty()) {
+            BoundingBox first = sortedBoxes.remove(0);
+            selectedBoxes.add(first);
 
-    private void displayPrediction(float[][][] output) {
-        int predictedClassIndex = argmax(output);
-
-        // Here you can map predicted class index to the actual emotion label
-        String[] emotionClasses = {
-                "Happy", "Sad", "Angry", "Surprised", "Disgusted", "Fearful", "Neutral", "Bored"
-        };
-
-        // Get the confidence value for the predicted class
-        float maxConfidence = Float.MIN_VALUE;
-        for (int i = 0; i < output[0][predictedClassIndex].length; i++) {
-            if (output[0][predictedClassIndex][i] > maxConfidence) {
-                maxConfidence = output[0][predictedClassIndex][i];
-            }
+            sortedBoxes.removeIf(nextBox -> calculateIoU(first, nextBox) >= IOU_THRESHOLD);
         }
 
-        // Show the predicted emotion and its confidence
-        String predictionMessage = "Predicted Emotion: " + emotionClasses[predictedClassIndex] +
-                "\nConfidence: " + maxConfidence;
-
-        Toast.makeText(this, predictionMessage, Toast.LENGTH_LONG).show();
-        Log.d("TensorFlow", predictionMessage);
+        return selectedBoxes;
     }
 
+    private float calculateIoU(BoundingBox box1, BoundingBox box2) {
+        float x1 = Math.max(box1.x1, box2.x1);
+        float y1 = Math.max(box1.y1, box2.y1);
+        float x2 = Math.min(box1.x2, box2.x2);
+        float y2 = Math.min(box1.y2, box2.y2);
+        float intersectionArea = Math.max(0f, x2 - x1) * Math.max(0f, y2 - y1);
+        float box1Area = box1.w * box1.h;
+        float box2Area = box2.w * box2.h;
+        return intersectionArea / (box1Area + box2Area - intersectionArea);
+    }
 
+    private Bitmap drawBoundingBoxes(Bitmap bitmap, List<BoundingBox> boxes) {
+        Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(mutableBitmap);
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(8f);
 
-    public float[][][] classifyImage(Bitmap bitmap) {
-        // Resize the image to match the input size expected by the model (640x640)
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, image_size, image_size, true);
+        Paint textPaint = new Paint();
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(40f);
+        textPaint.setTypeface(Typeface.DEFAULT_BOLD);
 
-        // Create a ByteBuffer to hold the image data
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * 1 * image_size * image_size * 3); // 1 image, 640x640x3
-        byteBuffer.order(ByteOrder.nativeOrder());
-
-        int[] intValues = new int[image_size * image_size];
-        resizedBitmap.getPixels(intValues, 0, image_size, 0, 0, image_size, image_size);
-
-        // Normalize the pixel values (scale them to [0, 1] range) and put them in the byteBuffer
-        for (int i = 0; i < intValues.length; i++) {
-            int pixel = intValues[i];
-            float r = ((pixel >> 16) & 0xFF) / 255.0f;
-            float g = ((pixel >> 8) & 0xFF) / 255.0f;
-            float b = (pixel & 0xFF) / 255.0f;
-
-            byteBuffer.putFloat(r);  // Put each channel's normalized value
-            byteBuffer.putFloat(g);
-            byteBuffer.putFloat(b);
+        for (BoundingBox box : boxes) {
+            RectF rect = new RectF(box.x1 * mutableBitmap.getWidth(), box.y1 * mutableBitmap.getHeight(),
+                    box.x2 * mutableBitmap.getWidth(), box.y2 * mutableBitmap.getHeight());
+            canvas.drawRect(rect, paint);
+            canvas.drawText(box.clsName, rect.left, rect.bottom, textPaint);
         }
 
-        // Create an array to store the model's output
-        float[][][] output = new float[1][8][8400]; // Adjust output shape according to your model
-
-        // Run the model
-        tflite.run(byteBuffer, output);
-
-        // Return the model's output as the result
-        return output;  // You can process this output further based on what the model returns
+        return mutableBitmap;
     }
-
-
-
-
-
 }
