@@ -17,6 +17,7 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -54,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private List<String> labels = new ArrayList<>();
     private ImageView imageView;
     private Button takePictureBtn;
-    private static final float CONFIDENCE_THRESHOLD = 0.3f;
+    private TextView outputTxt;
+    private static final float CONFIDENCE_THRESHOLD = 0.1f;
     private static final float IOU_THRESHOLD = 0.5f;
 
     String namaFile;
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.previewView);
         takePictureBtn = findViewById(R.id.captureBtn);
+        outputTxt = findViewById(R.id.outputTxt);
         initializeModel();
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
@@ -101,12 +104,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeModel() {
         try {
-            // Load the model using TensorFlow Lite Interpreter
             Interpreter.Options options = new Interpreter.Options();
-            options.setNumThreads(4);  // You can adjust the number of threads
+            options.setNumThreads(4);
             interpreter = new Interpreter(FileUtil.loadMappedFile(this, MODEL_PATH), options);
 
-            // Get input and output shapes
             int[] inputShape = interpreter.getInputTensor(0).shape();
             int[] outputShape = interpreter.getOutputTensor(0).shape();
 
@@ -157,13 +158,24 @@ public class MainActivity extends AppCompatActivity {
         interpreter.run(tensorImage.getBuffer(), outputBuffer.getBuffer());
         List<BoundingBox> boundingBoxes = processOutput(outputBuffer.getFloatArray());
 
-        // Draw the bounding boxes on the image
         Bitmap resultBitmap = drawBoundingBoxes(bitmap, boundingBoxes);
 
-        // Set the processed image with bounding boxes to the ImageView
         imageView.setImageBitmap(resultBitmap);
 
-        // Display a success toast
+        StringBuilder result = new StringBuilder();
+
+        StringBuilder resultString = new StringBuilder();
+        for (BoundingBox box : boundingBoxes) {
+            resultString.append(box.clsName).append(": ").append(box.cnf).append("\n");
+            result.append(box.clsName);
+        }
+
+        outputTxt.setText(resultString.toString());
+
+        if(result.toString().equals("sedih")){
+
+        }
+
         Toast.makeText(this, "Object detection completed!", Toast.LENGTH_LONG).show();
     }
 
@@ -181,6 +193,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (maxConf > CONFIDENCE_THRESHOLD) {
+                String className = labels.get(maxIdx);
+                Log.d("ObjectDetection", "Detected: " + className + " with confidence: " + maxConf);
+
                 float cx = outputArray[c];
                 float cy = outputArray[c + numElements];
                 float w = outputArray[c + numElements * 2];
