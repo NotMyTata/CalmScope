@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:title="Home"
+        android:icon="@drawable/selector_home"/>
+    <item
+        android:id="@+id/photoFragment"
+        android:title="Photo"
+        android:icon="@drawable/selector_photo"/>
+    <item
+        android:id="@+id/logFragment"
+        android:title="Log"
+        android:icon="@drawable/selector_log"/>
+</menu>

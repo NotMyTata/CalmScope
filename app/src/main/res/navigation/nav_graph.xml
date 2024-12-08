@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav"
+    app:startDestination="@id/homeFragment">
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.calmscope.Home.HomeFragment"
+        tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/photoFragment"
+        android:name="com.example.calmscope.Photo.PhotoFragment"
+        tools:layout="@layout/fragment_photo" />
+    <fragment
+        android:id="@+id/logFragment"
+        android:name="com.example.calmscope.Log.LogFragment"
+        tools:layout="@layout/fragment_log" />
+</navigation>

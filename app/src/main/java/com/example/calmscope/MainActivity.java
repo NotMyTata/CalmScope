@@ -1,62 +1,31 @@
 package com.example.calmscope;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.WindowManager;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager.widget.ViewPager;
+import androidx.fragment.app.FragmentContainerView;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    ViewPager viewPager;
-    NavAccessorAdapter navAccessorAdapter;
-    TabLayout tabLayout;
+    SharedPreferences prefs = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        viewPager = findViewById(R.id.viewpager);
-        tabLayout = findViewById(R.id.tabs);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavView);
+        NavController navController = Navigation.findNavController(this, R.id.fragment);
+        NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
-        setViewPager();
-        setTabLayout();
-    }
-
-    private void setViewPager(){
-        navAccessorAdapter = new NavAccessorAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(navAccessorAdapter);
-    }
-
-    private void setTabLayout(){
-        tabLayout.setupWithViewPager(viewPager);
-        setTabIcons();
-        setTabListener();
-    }
-
-    private void setTabIcons(){
-        tabLayout.getTabAt(0).setIcon(R.drawable.ic_tab_home);
-        tabLayout.getTabAt(1).setIcon(R.drawable.ic_tab_photo);
-        tabLayout.getTabAt(2).setIcon(R.drawable.ic_tab_log);
-    }
-
-    private void setTabListener(){
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
     }
 }
