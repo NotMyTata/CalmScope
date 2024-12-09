@@ -16,4 +16,8 @@
         android:id="@+id/logFragment"
         android:name="com.example.calmscope.Log.LogFragment"
         tools:layout="@layout/fragment_log" />
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.calmscope.Maps.MapsFragment"
+        tools:layout="@layout/fragment_maps" />
 </navigation>

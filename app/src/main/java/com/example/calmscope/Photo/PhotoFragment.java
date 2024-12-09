@@ -17,6 +17,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -31,6 +33,7 @@ import android.widget.Toast;
 
 import com.example.calmscope.Maps.MapsFragment;
 import com.example.calmscope.R;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -157,13 +160,11 @@ public class PhotoFragment extends Fragment {
                                 Toast.makeText(requireContext(), "Analysis Complete!", Toast.LENGTH_LONG).show();
 
                                 if ("stress".equalsIgnoreCase(detectedClass)) {
-                                    MapsFragment mapsFragment = new MapsFragment();
-                                    requireActivity().getSupportFragmentManager()
-                                            .beginTransaction()
-                                            .replace(R.id.maps_fragment, mapsFragment)
-                                            .addToBackStack(null)
-                                            .commit();
+                                    NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
+                                    navController.navigate(R.id.mapFragment);
                                 }
+                                NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
+                                navController.navigate(R.id.mapFragment);
                             });
                         } else {
                             requireActivity().runOnUiThread(() ->

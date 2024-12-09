@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.calmscope.R;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -50,34 +53,60 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Get the user's location
-        LocationManager locationManager = (LocationManager) requireActivity().getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             return;
         }
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (location != null) {
-            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 12));
+        // Get the user's location
+        FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 12));
+                        fetchNearbyPlaces(userLocation);
+                        Log.d("Location", "location is zooming");
+                    } else {
+                        Log.d("Location", "location is not zooming");
+                    }
+                });
 
-            // Fetch nearby places
-            fetchNearbyPlaces(userLocation);
-        }
     }
 
-    private void fetchNearbyPlaces(LatLng location) {
-        String apiKey = "YOUR_PLACES_API_KEY";
-        String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="
-                + location.latitude + "," + location.longitude
-                + "&radius=200000&keyword=therapists|consultant&key=" + apiKey;
+    private void fetchNearbyPlaces(LatLng userLocation) {
+        String apiKey = "AIzaSyBjN3UoOG_hV6TWXALl6XMnBYZaLdCUSDE";
+        String url = "https://places.googleapis.com/v1/places:searchNearby";
+
+        // JSON Payload
+        String jsonPayload = "{\n" +
+                "  \"includedTypes\": [\"consultant\", \"therapist\", \"psychologist\", \"mental health counselor\", \"depression specialist\"],\n" +                "  \"maxResultCount\": 10,\n" +
+                "  \"locationRestriction\": {\n" +
+                "    \"circle\": {\n" +
+                "      \"center\": {\n" +
+                "        \"latitude\": " + userLocation.latitude + ",\n" +
+                "        \"longitude\": " + userLocation.longitude + "\n" +
+                "      },\n" +
+                "      \"radius\": 500.0\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
         new Thread(() -> {
             try {
+                // Setup the connection
                 HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-                connection.setRequestMethod("GET");
-                InputStream stream = connection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("X-Goog-Api-Key", apiKey);
+                connection.setRequestProperty("X-Goog-FieldMask", "places.displayName");
+
+                // Write the JSON payload
+                connection.getOutputStream().write(jsonPayload.getBytes("UTF-8"));
+
+                // Read the response
+                InputStream inputStream = connection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 StringBuilder response = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -85,31 +114,34 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 }
                 reader.close();
 
-                JSONObject jsonObject = new JSONObject(response.toString());
-                JSONArray results = jsonObject.getJSONArray("results");
+                Log.d("JSON Response", response.toString());
 
+                // Parse and update the map
+                JSONObject jsonObject = new JSONObject(response.toString());
+                JSONArray places = jsonObject.getJSONArray("places");
                 requireActivity().runOnUiThread(() -> {
-                    for (int i = 0; i < results.length(); i++) {
+                    for (int i = 0; i < places.length(); i++) {
                         try {
-                            JSONObject place = results.getJSONObject(i);
-                            String name = place.getString("name");
-                            String address = place.getString("vicinity");
-                            JSONObject locationObj = place.getJSONObject("geometry").getJSONObject("location");
-                            LatLng placeLatLng = new LatLng(locationObj.getDouble("lat"), locationObj.getDouble("lng"));
+                            JSONObject place = places.getJSONObject(i);
+                            String displayName = place.getString("displayName");
+                            JSONObject center = place.getJSONObject("location").getJSONObject("center");
+                            LatLng placeLatLng = new LatLng(center.getDouble("latitude"), center.getDouble("longitude"));
 
                             // Add a marker for each place
                             mMap.addMarker(new MarkerOptions()
                                     .position(placeLatLng)
-                                    .title(name)
-                                    .snippet(address));
+                                    .title(displayName));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 });
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
     }
+
+
 }
