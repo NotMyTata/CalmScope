@@ -39,6 +39,8 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation("androidx.navigation:navigation-ui:2.8.4")
+    implementation("androidx.navigation:navigation-fragment:2.8.4")
     testImplementation(libs.junit)
     implementation("androidx.core:core-splashscreen:1.0.1")
     androidTestImplementation(libs.ext.junit)

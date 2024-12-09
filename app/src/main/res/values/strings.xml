@@ -6,4 +6,6 @@
     <string name="disclaimer_desc">Using this app, we will try to help you detect signs of any mental health issues through your  expression by capturing photos via your camera. If you’re fine with this, click the “I’m Okay” button, otherwise click the “Not Okay” button.</string>
     <string name="disclaimer_btn_disagree">Not Okay</string>
     <string name="disclaimer_btn_agree">I\'m Okay</string>
+    <string name="take_new_photo">Take New Photo</string>
+    <string name="analyze_photo">Analyze Photo</string>
 </resources>

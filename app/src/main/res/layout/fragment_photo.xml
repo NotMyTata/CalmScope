@@ -7,13 +7,77 @@
     tools:context=".Photo.PhotoFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Photo Fragment"
+        android:orientation="vertical"
+        android:paddingBottom="75dp"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/currentPhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_foreground_1" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/newPhotoBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/red"
+                android:text="@string/take_new_photo"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/grey"
+                app:strokeWidth="1dp"
+                android:layout_marginEnd="10dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/analyzeBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/white"
+                android:text="@string/analyze_photo"
+                android:textColor="@color/black"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/grey"
+                app:strokeWidth="1dp"
+                android:layout_marginStart="10dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/resultTxt"
+            android:textSize="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Result after Analysis" />
+
+        <TextView
+            android:id="@+id/confidenceTxt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginBottom="10dp"
+            android:text="Confidence Rating : " />
+
+        <TextView
+            android:id="@+id/classTxt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Detected Emotion : " />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
