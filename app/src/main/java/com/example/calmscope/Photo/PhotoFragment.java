@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.calmscope.Maps.MapsFragment;
 import com.example.calmscope.R;
 
 import org.json.JSONArray;
@@ -154,6 +155,15 @@ public class PhotoFragment extends Fragment {
                                 classTxt.setText("Class: " + detectedClass);
                                 confidenceTxt.setText("Confidence: " + (int) (confidence * 100) + "%");
                                 Toast.makeText(requireContext(), "Analysis Complete!", Toast.LENGTH_LONG).show();
+
+                                if ("stress".equalsIgnoreCase(detectedClass)) {
+                                    MapsFragment mapsFragment = new MapsFragment();
+                                    requireActivity().getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .replace(R.id.maps_fragment, mapsFragment)
+                                            .addToBackStack(null)
+                                            .commit();
+                                }
                             });
                         } else {
                             requireActivity().runOnUiThread(() ->
