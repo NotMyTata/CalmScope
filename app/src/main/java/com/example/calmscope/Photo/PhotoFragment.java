@@ -57,12 +57,9 @@ public class PhotoFragment extends Fragment {
         Button newPhotoBtn = view.findViewById(R.id.newPhotoBtn);
         Button analyzeBtn = view.findViewById(R.id.analyzeBtn);
         ImageView currentPhoto = view.findViewById(R.id.currentPhoto);
-        TextView confidenceTxt = view.findViewById(R.id.confidenceTxt);
-        TextView classTxt = view.findViewById(R.id.classTxt);
 
         if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Request the permission
             ActivityCompat.requestPermissions(this.requireActivity(), new String[]{Manifest.permission.CAMERA}, 1);
         }
 
@@ -95,89 +92,12 @@ public class PhotoFragment extends Fragment {
         analyzeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (namaFile.isEmpty()) {
-                    Toast.makeText(requireContext(), "No photo to analyze!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                new Thread(() -> {
-                    try {
-                        File file = new File(namaFile);
-
-                        // Base64 Encode the image
-                        String encodedFile = "";
-                        FileInputStream fileInputStreamReader = new FileInputStream(file);
-                        byte[] bytes = new byte[(int) file.length()];
-                        fileInputStreamReader.read(bytes);
-                        fileInputStreamReader.close();
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            encodedFile = Base64.getEncoder().encodeToString(bytes);
-                        }
-
-                        // Define API Key and Endpoint
-                        String API_KEY = "gHAEteoBBc8llY5NZkgV"; // Replace with your API key
-                        String MODEL_ENDPOINT = "calmscope-slnhz"; // Replace with your model endpoint
-                        String uploadURL = "https://detect.roboflow.com/calmscope-slnhz/1?api_key=gHAEteoBBc8llY5NZkgV&name=" + file.getName();
-
-                        // Set up the HTTP connection
-                        URL url = new URL(uploadURL);
-                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                        connection.setRequestMethod("POST");
-                        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                        connection.setRequestProperty("Content-Length", Integer.toString(encodedFile.getBytes().length));
-                        connection.setRequestProperty("Content-Language", "en-US");
-                        connection.setUseCaches(false);
-                        connection.setDoOutput(true);
-
-                        // Send the request
-                        DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-                        wr.writeBytes(encodedFile);
-                        wr.flush();
-                        wr.close();
-
-                        // Read the response
-                        InputStream stream = connection.getInputStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                        StringBuilder response = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            response.append(line).append("\n");
-                        }
-                        reader.close();
-
-                        String jsonResponse = response.toString();
-                        JSONObject jsonObject = new JSONObject(jsonResponse);
-                        JSONArray predictions = jsonObject.getJSONArray("predictions");
-                        if (predictions.length() > 0) {
-                            JSONObject firstPrediction = predictions.getJSONObject(0);
-                            String detectedClass = firstPrediction.getString("class");
-                            double confidence = firstPrediction.getDouble("confidence");
-
-                            // Update the UI with class and confidence
-                            requireActivity().runOnUiThread(() -> {
-                                classTxt.setText("Class: " + detectedClass);
-                                confidenceTxt.setText("Confidence: " + (int) (confidence * 100) + "%");
-                                Toast.makeText(requireContext(), "Analysis Complete!", Toast.LENGTH_LONG).show();
-
-                                if ("stress".equalsIgnoreCase(detectedClass)) {
-                                    NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
-                                    navController.navigate(R.id.mapFragment);
-                                }
-                            });
-                        } else {
-                            requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(requireContext(), "No predictions found.", Toast.LENGTH_LONG).show());
-                        }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        requireActivity().runOnUiThread(() ->
-                                Toast.makeText(requireContext(), "Error during analysis", Toast.LENGTH_LONG).show());
-                    }
-                }).start();
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
+                Bundle bundle = new Bundle();
+                bundle.putString("imageFilePath", namaFile);
+                navController.navigate(R.id.loadJsonFragment, bundle);
             }
         });
-
 
 
         // Inflate the layout for this fragment

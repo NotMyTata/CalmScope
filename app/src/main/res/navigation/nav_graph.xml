@@ -20,4 +20,16 @@
         android:id="@+id/mapFragment"
         android:name="com.example.calmscope.Maps.MapsFragment"
         tools:layout="@layout/fragment_maps" />
+    <fragment
+        android:id="@+id/loadJsonFragment"
+        android:name="com.example.calmscope.Photo.LoadJsonFragment"
+        tools:layout="@layout/fragment_loadjson" />
+    <fragment
+        android:id="@+id/sadFragment"
+        android:name="com.example.calmscope.Photo.SadFragment"
+        tools:layout="@layout/fragment_sad" />
+    <fragment
+        android:id="@+id/neutralFragment"
+        android:name="com.example.calmscope.Photo.NeutralFragment"
+        tools:layout="@layout/fragment_result" />
 </navigation>

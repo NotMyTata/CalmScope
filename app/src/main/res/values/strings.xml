@@ -8,4 +8,5 @@
     <string name="disclaimer_btn_agree">I\'m Okay</string>
     <string name="take_new_photo">Take New Photo</string>
     <string name="analyze_photo">Analyze Photo</string>
+    <string name="the_photo_is_in_the_processing_stage_please_wait_until_it_is_complete_thank_you">The photo is in the processing stage, please wait until it is complete... Thank you!</string>
 </resources>
