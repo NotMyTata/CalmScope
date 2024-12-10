@@ -56,7 +56,7 @@ public class PhotoFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
         Button newPhotoBtn = view.findViewById(R.id.newPhotoBtn);
         Button analyzeBtn = view.findViewById(R.id.analyzeBtn);
-        ImageView currentPhoto = view.findViewById(R.id.currentPhoto);
+        ImageView currentPhoto = view.findViewById(R.id.placeholderPhoto);
 
         if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {

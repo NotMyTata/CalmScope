@@ -34,6 +34,10 @@ public class LoadJsonFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_loadjson, container, false);
 
         String imageFilePath = requireArguments().getString("imageFilePath");
+
+        Bundle bundle = new Bundle();
+        bundle.putString("imageFilePath", imageFilePath);
+
         new Thread(() -> {
             try {
                 File file = new File(imageFilePath);
@@ -83,9 +87,9 @@ public class LoadJsonFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
                         if ("stress".equalsIgnoreCase(detectedClass)) {
-                            navController.navigate(R.id.sadFragment);
+                            navController.navigate(R.id.sadFragment, bundle);
                         } else {
-                            navController.navigate(R.id.neutralFragment);
+                            navController.navigate(R.id.neutralFragment, bundle);
                         }
                     });
                 } else {
@@ -96,6 +100,8 @@ public class LoadJsonFragment extends Fragment {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
+                navController.navigate(R.id.errorFragment);
                 requireActivity().runOnUiThread(() ->
                         Toast.makeText(requireContext(), "Error during analysis", Toast.LENGTH_LONG).show()
                 );

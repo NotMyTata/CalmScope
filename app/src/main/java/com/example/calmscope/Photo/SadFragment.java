@@ -1,10 +1,14 @@
 package com.example.calmscope.Photo;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +27,12 @@ public class SadFragment extends Fragment {
 
         Button backBtn = view.findViewById(R.id.goBackBtn);
         Button nearYouBtn = view.findViewById(R.id.nearYouBtn);
+        ImageView currentPhoto = view.findViewById(R.id.currentPhoto);
+
+        String imageFilePath = requireArguments().getString("imageFilePath");
+
+        Bitmap bm = BitmapFactory.decodeFile(imageFilePath);
+        currentPhoto.setImageBitmap(bm);
 
         nearYouBtn.setOnClickListener(new View.OnClickListener() {
             @Override
