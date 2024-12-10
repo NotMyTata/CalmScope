@@ -32,4 +32,8 @@
         android:id="@+id/neutralFragment"
         android:name="com.example.calmscope.Photo.NeutralFragment"
         tools:layout="@layout/fragment_result" />
+    <fragment
+        android:id="@+id/errorFragment"
+        android:name="com.example.calmscope.Photo.ErrorFragment"
+        tools:layout="@layout/fragment_error" />
 </navigation>
