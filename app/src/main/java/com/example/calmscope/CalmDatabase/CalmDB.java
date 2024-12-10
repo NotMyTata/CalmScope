@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
 import com.example.calmscope.CalmDatabase.Daos.EmotionsDao;
 import com.example.calmscope.CalmDatabase.Daos.ResultsDao;
@@ -14,6 +15,7 @@ import com.example.calmscope.CalmDatabase.Entities.Results;
 import com.example.calmscope.CalmDatabase.Entities.Users;
 
 @Database(entities = {Users.class, Emotions.class, Results.class}, version = 1)
+@TypeConverters({Converters.class})
 public abstract class CalmDB extends RoomDatabase {
     public abstract UsersDao usersDao();
     public abstract EmotionsDao emotionsDao();

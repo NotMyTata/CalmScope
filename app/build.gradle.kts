@@ -43,11 +43,11 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation (libs.play.services.location)
     implementation(libs.navigation.runtime)
+    implementation(libs.room.common)
+    implementation(libs.room.runtime)
     testImplementation(libs.junit)
     implementation("androidx.core:core-splashscreen:1.0.1")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    annotationProcessor("androidx.room:room-compiler:$room_version")
+    annotationProcessor(libs.room.compiler)
 }

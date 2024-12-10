@@ -21,10 +21,7 @@ public class DisclaimerActivity extends AppCompatActivity {
 
         btn_ok.setOnClickListener(v -> {
             if(v.getId() == R.id.disclaimerOK){
-                // TODO: ask for permission write read access file, camera use, and location
-                SharedPreferences prefs = getSharedPreferences("com.example.calmscope", MODE_PRIVATE);
-                prefs.edit().putBoolean("firstrun", false).commit();
-                startActivity(new Intent(this, MainActivity.class));
+                startActivity(new Intent(this, CreateUserActivity.class));
                 finish();
             }
         });

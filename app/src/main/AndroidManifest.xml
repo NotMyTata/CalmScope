@@ -28,6 +28,9 @@
             android:name=".DisclaimerActivity"
             android:exported="false" />
         <activity
+            android:name=".CreateUserActivity"
+            android:exported="false"/>
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity

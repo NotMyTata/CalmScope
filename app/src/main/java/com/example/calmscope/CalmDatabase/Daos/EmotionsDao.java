@@ -14,6 +14,12 @@ public interface EmotionsDao {
     @Query("SELECT * FROM Emotions")
     List<Emotions> getAll();
 
+    @Query("SELECT * FROM Emotions WHERE id=:id")
+    Emotions findById(int id);
+
+    @Query("SELECT * FROM Emotions WHERE type LIKE :type LIMIT 1")
+    Emotions findByType(String type);
+
     @Insert
     void insertAll(Emotions... emotions);
 

@@ -4,30 +4,28 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity
+import java.sql.Date;
+
+@Entity(tableName = "users")
 public class Users {
     @PrimaryKey(autoGenerate = true)
     private int id;
-    @ColumnInfo(name = "profile")
-    private int profile;
     @ColumnInfo(name = "username")
     private String username;
+    @ColumnInfo(name = "created")
+    private Date date;
 
-    public Users(int profile, String username){
-        this.profile = profile;
+    public Users(String username, Date date) {
         this.username = username;
+        this.date = date;
     }
 
     public int getId() {
         return id;
     }
 
-    public int getProfile() {
-        return profile;
-    }
-
-    public void setProfile(int profile) {
-        this.profile = profile;
+    public void setId(int id){
+        this.id = id;
     }
 
     public String getUsername() {
@@ -36,5 +34,13 @@ public class Users {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }

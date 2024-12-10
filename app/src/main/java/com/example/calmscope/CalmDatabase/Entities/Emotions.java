@@ -4,23 +4,26 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity
+@Entity(tableName = "emotions")
 public class Emotions {
     @PrimaryKey(autoGenerate = true)
     private int id;
     @ColumnInfo(name = "type")
     private String type;
-    @ColumnInfo(name = "atRisk")
+    @ColumnInfo(name = "at_risk")
     private boolean atRisk;
 
-    public Emotions(int id, String type, boolean atRisk) {
-        this.id = id;
+    public Emotions(String type, boolean atRisk) {
         this.type = type;
         this.atRisk = atRisk;
     }
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getType() {
