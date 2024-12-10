@@ -9,4 +9,18 @@
     <string name="take_new_photo">Take New Photo</string>
     <string name="analyze_photo">Analyze Photo</string>
     <string name="the_photo_is_in_the_processing_stage_please_wait_until_it_is_complete_thank_you">The photo is in the processing stage, please wait until it is complete... Thank you!</string>
+    <string name="log_title">Times You Are At Risk</string>
+    <string name="log_countRiskWeek">This Week</string>
+    <string name="log_countRiskMonth">This Month</string>
+    <string name="log_countRiskYear">This Year</string>
+    <string name="log_countRiskAllTime">All Time</string>
+    <string name="log_riskPlaceholder">0</string>
+    <string name="log_dayETHint">DD</string>
+    <string name="log_monthETHint">MM</string>
+    <string name="log_yearETHint">YYYY</string>
+    <string name="logSearchBtn">Search</string>
+    <string name="createUser_usernameText">Create your own Username</string>
+    <string name="createUser_hint">Enter here</string>
+    <string name="createUser_submitBtn">Submit</string>
+    <string name="home_titlePlaceholder">Welcome {username}</string>
 </resources>

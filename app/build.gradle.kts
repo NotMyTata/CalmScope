@@ -42,9 +42,13 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.play.services.maps)
     implementation (libs.play.services.location)
+    implementation(libs.navigation.runtime)
+    implementation(libs.room.common)
+    implementation(libs.room.runtime)
     testImplementation(libs.junit)
     implementation ("com.google.android.libraries.places:places:4.1.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    annotationProcessor(libs.room.compiler)
 }

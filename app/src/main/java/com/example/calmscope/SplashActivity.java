@@ -8,12 +8,11 @@ import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashActivity extends AppCompatActivity {
-    // TODO: solve the problem where the user can back out of disclaimer and still continue to home
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-
 
         new Handler().postDelayed(new Runnable() {
             @Override
