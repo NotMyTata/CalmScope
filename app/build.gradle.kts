@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.navigation.runtime)
     implementation(libs.room.common)
     implementation(libs.room.runtime)
+    implementation("androidx.room:room-common:2.6.1")
     testImplementation(libs.junit)
     implementation ("com.google.android.libraries.places:places:4.1.0")
     implementation("androidx.core:core-splashscreen:1.0.1")

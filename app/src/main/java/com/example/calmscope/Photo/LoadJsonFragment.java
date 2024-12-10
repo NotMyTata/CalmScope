@@ -93,6 +93,8 @@ public class LoadJsonFragment extends Fragment {
                         }
                     });
                 } else {
+                    NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
+                    navController.navigate(R.id.errorFragment);
                     requireActivity().runOnUiThread(() ->
                             Toast.makeText(requireContext(), "No predictions found.", Toast.LENGTH_LONG).show()
                     );
