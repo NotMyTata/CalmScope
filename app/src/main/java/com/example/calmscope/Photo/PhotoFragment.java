@@ -163,8 +163,6 @@ public class PhotoFragment extends Fragment {
                                     NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
                                     navController.navigate(R.id.mapFragment);
                                 }
-                                NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
-                                navController.navigate(R.id.mapFragment);
                             });
                         } else {
                             requireActivity().runOnUiThread(() ->
