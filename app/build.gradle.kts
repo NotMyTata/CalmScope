@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation (libs.play.services.location)
     testImplementation(libs.junit)
+    implementation ("com.google.android.libraries.places:places:4.1.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
