@@ -1,5 +1,7 @@
 package com.example.calmscope.Photo;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
@@ -16,7 +18,11 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.example.calmscope.CalmDatabase.CalmDB;
+import com.example.calmscope.CalmDatabase.Entities.Results;
 import com.example.calmscope.R;
+
+import java.sql.Date;
 
 public class SadFragment extends Fragment {
 
@@ -24,6 +30,14 @@ public class SadFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sad, container, false);
+
+        CalmDB db = CalmDB.getInstance(getContext());
+        SharedPreferences prefs = getContext().getSharedPreferences("com.example.calmscope", Context.MODE_PRIVATE);
+        db.resultsDao().insertResult(new Results(
+                db.usersDao().getIdByUsername(prefs.getString("currentUser","")),
+                db.emotionsDao().findByType("Sad").getId(),
+                new java.sql.Date(new java.util.Date().getTime()))
+        );
 
         Button backBtn = view.findViewById(R.id.goBackBtn);
         Button nearYouBtn = view.findViewById(R.id.nearYouBtn);

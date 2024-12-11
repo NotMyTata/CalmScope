@@ -42,6 +42,7 @@ public class CreateUserActivity extends AppCompatActivity {
 
                     SharedPreferences prefs = getSharedPreferences("com.example.calmscope", MODE_PRIVATE);
                     prefs.edit().putBoolean("firstrun", false).commit();
+                    prefs.edit().putString("currentUser", username).commit();
 
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
                     finish();

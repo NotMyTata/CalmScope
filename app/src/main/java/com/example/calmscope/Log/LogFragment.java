@@ -14,13 +14,13 @@ import android.widget.Spinner;
 import com.example.calmscope.CalmDatabase.CalmDB;
 import com.example.calmscope.CalmDatabase.Entities.Results;
 import com.example.calmscope.R;
+import com.example.calmscope.ResultsAdapter;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LogFragment extends Fragment {
-    private static LogAdapter logAdapter;
+    private static ResultsAdapter resultsAdapter;
     private static ArrayList<Results> resultsList;
 
     @Override
@@ -37,7 +37,7 @@ public class LogFragment extends Fragment {
     private void setDropdown(View view){
         Spinner dropdownDate = view.findViewById(R.id.logSpinnerDate);
 
-        String[] dateItems = new String[]{"Every", "Before", "After", "During"};
+        String[] dateItems = new String[]{"All", "Before", "After", "During"};
         ArrayAdapter<String> dateAdapter = new ArrayAdapter<String>(
                 this.getContext(),
                 androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
@@ -46,24 +46,24 @@ public class LogFragment extends Fragment {
     }
 
     private void loadDatabase(View view){
+        CalmDB db = CalmDB.getInstance(getContext());
+
         ListView listView = view.findViewById(R.id.logListView);
         resultsList = new ArrayList<>();
-        logAdapter = new LogAdapter(getContext(), R.layout.fragment_log, resultsList);
+        resultsAdapter = new ResultsAdapter(getContext(), R.layout.fragment_log, resultsList);
 
-//        Results result1 = new Results(1, "Neutral", false, new Date(2024, 12, 1));
-//        CalmDB.getInstance(getContext()).resultsDao().insertResult(result1);
-//        insertResult(result1);
+        resultsList.addAll(db.resultsDao().getAllDesc());
 
-        listView.setAdapter(logAdapter);
+        listView.setAdapter(resultsAdapter);
     }
 
     private void insertResult(Results result){
         resultsList.add(result);
-        logAdapter.notifyDataSetChanged();
+        resultsAdapter.notifyDataSetChanged();
     }
 
     private void insertResults(List<Results> results){
         resultsList.addAll(results);
-        logAdapter.notifyDataSetChanged();
+        resultsAdapter.notifyDataSetChanged();
     }
 }

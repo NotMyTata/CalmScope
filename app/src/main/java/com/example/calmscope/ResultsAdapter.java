@@ -1,4 +1,4 @@
-package com.example.calmscope.Log;
+package com.example.calmscope;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,18 +10,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.calmscope.CalmDatabase.CalmDB;
 import com.example.calmscope.CalmDatabase.Entities.Results;
-import com.example.calmscope.R;
 
 import java.util.ArrayList;
 
-public class LogAdapter extends ArrayAdapter<Results> {
+public class ResultsAdapter extends ArrayAdapter<Results> {
 
     private static class ViewHolder{
         TextView emotion, risk, date;
     }
 
-    public LogAdapter(@NonNull Context context, int resource, @NonNull ArrayList<Results> objects) {
+    public ResultsAdapter(@NonNull Context context, int resource, @NonNull ArrayList<Results> objects) {
         super(context, resource, objects);
     }
 
@@ -39,17 +39,20 @@ public class LogAdapter extends ArrayAdapter<Results> {
             viewResults.risk = convertView.findViewById(R.id.resultRisk);
             viewResults.date = convertView.findViewById(R.id.resultDate);
 
+            convertView.setTag(viewResults);
         } else {
             viewResults = (ViewHolder) convertView.getTag();
         }
 
-//        viewResults.emotion.setText(result.getEmotion());
-//        if(result.isAtRisk()){
-//            viewResults.risk.setText("Potential Health Risk");
-//        } else {
-//            viewResults.risk.setText("You're Safe");
-//        }
-//        viewResults.date.setText(result.getDate().toString());
+        CalmDB db = CalmDB.getInstance(getContext());
+
+        viewResults.emotion.setText(db.emotionsDao().getTypeById(result.getEmotionId()));
+        if(db.emotionsDao().getRiskById(result.getEmotionId())){
+            viewResults.risk.setText("Potential Health Risk");
+        } else {
+            viewResults.risk.setText("Safe");
+        }
+        viewResults.date.setText(result.getDate().toString());
 
         return convertView;
     }

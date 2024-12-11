@@ -20,6 +20,18 @@ public interface EmotionsDao {
     @Query("SELECT * FROM Emotions WHERE type LIKE :type LIMIT 1")
     Emotions findByType(String type);
 
+    @Query("SELECT COUNT(*) FROM Emotions WHERE type LIKE :type")
+    int countByType(String type);
+
+    @Query("SELECT type FROM Emotions WHERE id=:id")
+    String getTypeById(int id);
+
+    @Query("SELECT at_risk FROM Emotions WHERE id=:id")
+    boolean getRiskById(int id);
+
+    @Query("DELETE FROM Emotions")
+    void reset();
+
     @Insert
     void insertAll(Emotions... emotions);
 

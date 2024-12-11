@@ -15,7 +15,7 @@
             android:id="@+id/resultEmotion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Not Stressed"/>
+            android:text="Calm"/>
     </LinearLayout>
 
     <LinearLayout
@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="At Risk?\t\t\t\t: "/>
+            android:text="Risk\t\t\t\t\t\t\t\t: "/>
         <TextView
             android:id="@+id/resultRisk"
             android:layout_width="wrap_content"
@@ -38,7 +38,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Taken Date\t\t: "/>
+            android:text="Taken Date\t: "/>
         <TextView
             android:id="@+id/resultDate"
             android:layout_width="wrap_content"
