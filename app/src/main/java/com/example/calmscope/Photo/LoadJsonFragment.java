@@ -52,8 +52,6 @@ public class LoadJsonFragment extends Fragment {
                     encodedFile = Base64.getEncoder().encodeToString(bytes);
                 }
 
-                // API call setup
-                String API_KEY = "gHAEteoBBc8llY5NZkgV";
                 String uploadURL = "https://detect.roboflow.com/calmscope-slnhz/1?api_key=gHAEteoBBc8llY5NZkgV&name=" + file.getName();
 
                 URL url = new URL(uploadURL);
