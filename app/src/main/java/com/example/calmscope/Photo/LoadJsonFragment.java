@@ -86,7 +86,6 @@ public class LoadJsonFragment extends Fragment {
                     // Navigate based on class
                     requireActivity().runOnUiThread(() -> {
                         NavController navController = Navigation.findNavController(requireActivity(), R.id.fragment);
-                        navController.navigate(R.id.sadFragment, bundle);
                         if ("stress".equalsIgnoreCase(detectedClass)) {
                             navController.navigate(R.id.sadFragment, bundle);
                         } else {
