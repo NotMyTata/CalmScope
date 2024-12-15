@@ -10,12 +10,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.calmscope.CalmDatabase.CalmDB;
+import com.example.calmscope.CalmDatabase.DateUtils;
 import com.example.calmscope.CalmDatabase.Entities.Results;
 import com.example.calmscope.R;
 import com.example.calmscope.ResultsAdapter;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +50,34 @@ public class LogFragment extends Fragment {
 
     private void loadDatabase(View view){
         CalmDB db = CalmDB.getInstance(getContext());
+
+        // Risk statistics
+
+        Date thisWeekStart = DateUtils.getThisWeekStart();
+        Date thisWeekEnd = DateUtils.getThisWeekEnd();
+        int thisWeekCount = db.resultsDao().countRiskFromDate(thisWeekStart, thisWeekEnd);
+
+        Date thisMonthStart = DateUtils.getThisMonthStart();
+        Date thisMonthEnd = DateUtils.getThisMonthEnd();
+        int thisMonthCount = db.resultsDao().countRiskFromDate(thisMonthStart, thisMonthEnd);
+
+        Date thisYearStart = DateUtils.getThisYearStart();
+        Date thisYearEnd = DateUtils.getThisYearEnd();
+        int thisYearCount = db.resultsDao().countRiskFromDate(thisYearStart, thisYearEnd);
+
+        int total = db.resultsDao().getTotalRisk();
+
+        TextView amountWeek = view.findViewById(R.id.logRiskWeekCount);
+        TextView amountMonth = view.findViewById(R.id.logRiskMonthCount);
+        TextView amountYear = view.findViewById(R.id.logRiskYearCount);
+        TextView amountTotal = view.findViewById(R.id.logRiskAllTimeCount);
+
+        amountWeek.setText(Integer.toString(thisWeekCount));
+        amountMonth.setText(Integer.toString(thisMonthCount));
+        amountYear.setText(Integer.toString(thisYearCount));
+        amountTotal.setText(Integer.toString(total));
+
+        // Result List
 
         ListView listView = view.findViewById(R.id.logListView);
         resultsList = new ArrayList<>();

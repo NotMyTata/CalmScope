@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private void initializeDatabase(){
         CalmDB database = CalmDB.getInstance(getApplicationContext());
         EmotionsDao emotionsDao = database.emotionsDao();
-        ResultsDao resultsDao = database.resultsDao();
+//        ResultsDao resultsDao = database.resultsDao();
 
         Emotions[] emotion = new Emotions[]{
                 new Emotions("Sad", true),
@@ -55,20 +55,21 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        resultsDao.reset();
-
-        java.util.Date utilDate = new java.util.Date();
-        java.sql.Date date = new java.sql.Date(utilDate.getTime());
-
-        Results[] results = new Results[]{
-                new Results(1,1,date),
-                new Results(1,2,date),
-                new Results(1,1,date),
-                new Results(1,1,date),
-                new Results(1,2,date)
-        };
-        for (Results result : results){
-            resultsDao.insertResult(result);
-        }
+        // Mock result
+//        resultsDao.reset();
+//
+//        java.util.Date utilDate = new java.util.Date();
+//        java.sql.Date date = new java.sql.Date(utilDate.getTime());
+//
+//        Results[] results = new Results[]{
+//                new Results(1,1,date),
+//                new Results(1,2,date),
+//                new Results(1,1,date),
+//                new Results(1,1,date),
+//                new Results(1,2,date)
+//        };
+//        for (Results result : results){
+//            resultsDao.insertResult(result);
+//        }
     }
 }

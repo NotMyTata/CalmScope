@@ -43,6 +43,8 @@ public class HomeFragment extends Fragment {
     private void loadDatabase(View view){
         CalmDB db = CalmDB.getInstance(getContext());
 
+        // Result List
+
         TextView header = view.findViewById(R.id.homeWelcome);
         SharedPreferences prefs = getContext().getSharedPreferences("com.example.calmscope", Context.MODE_PRIVATE);
         header.setText("Welcome " + prefs.getString("currentUser", ""));
@@ -53,17 +55,19 @@ public class HomeFragment extends Fragment {
         resultsList.addAll(db.resultsDao().fetchLastThree());
         listView.setAdapter(resultsAdapter);
 
-        Date lastWeekStart = DateUtils.getLastWeekStart();
-        Date lastWeekEnd = DateUtils.getLastWeekEnd();
-        int lastWeekCount = db.resultsDao().countFromDate(lastWeekStart, lastWeekEnd);
+        // Statistics
 
-        Date lastMonthStart = DateUtils.getLastMonthStart();
-        Date lastMonthEnd = DateUtils.getLastMonthEnd();
-        int lastMonthCount = db.resultsDao().countFromDate(lastMonthStart, lastMonthEnd);
+        Date thisWeekStart = DateUtils.getThisWeekStart();
+        Date thisWeekEnd = DateUtils.getThisWeekEnd();
+        int thisWeekCount = db.resultsDao().countFromDate(thisWeekStart, thisWeekEnd);
 
-        Date lastYearStart = DateUtils.getLastYearStart();
-        Date lastYearEnd = DateUtils.getLastYearEnd();
-        int lastYearCount = db.resultsDao().countFromDate(lastYearStart, lastYearEnd);
+        Date thisMonthStart = DateUtils.getThisMonthStart();
+        Date thisMonthEnd = DateUtils.getThisMonthEnd();
+        int thisMonthCount = db.resultsDao().countFromDate(thisMonthStart, thisMonthEnd);
+
+        Date thisYearStart = DateUtils.getThisYearStart();
+        Date thisYearEnd = DateUtils.getThisYearEnd();
+        int thisYearCount = db.resultsDao().countFromDate(thisYearStart, thisYearEnd);
 
         int total = db.resultsDao().getTotal();
 
@@ -72,9 +76,9 @@ public class HomeFragment extends Fragment {
         TextView amountYear = view.findViewById(R.id.homeAmountCheckYear);
         TextView amountTotal = view.findViewById(R.id.homeAmountCheckTotal);
 
-        amountWeek.setText(lastWeekCount);
-        amountMonth.setText(lastMonthCount);
-        amountYear.setText(lastYearCount);
-        amountTotal.setText(total);
+        amountWeek.setText(Integer.toString(thisWeekCount));
+        amountMonth.setText(Integer.toString(thisMonthCount));
+        amountYear.setText(Integer.toString(thisYearCount));
+        amountTotal.setText(Integer.toString(total));
     }
 }
