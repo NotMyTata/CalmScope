@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.calmscope.BuildConfig;
 import com.example.calmscope.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -42,7 +43,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         // Initialize the Places API
         if (!Places.isInitialized()) {
-            Places.initialize(requireContext(), "AIzaSyBjN3UoOG_hV6TWXALl6XMnBYZaLdCUSDE");
+            Places.initialize(requireContext(), BuildConfig.API_KEY);
         }
         placesClient = Places.createClient(requireContext());
 
